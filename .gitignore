@@ -15,3 +15,9 @@ test/UnitTest/build/
 *~
 *#
 .arcconfig
+
+# Xcode 4 user settings #
+#########################
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/

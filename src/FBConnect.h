@@ -19,4 +19,9 @@
 #include "FBDialog.h"
 #include "FBLoginDialog.h"
 #include "FBRequest.h"
-#include "SBJSON.h"
+/**
+ * Removed #include "SBJSON.h" because we chose to use Three20's JSON support. We didn't 
+ * copy over JSON library packaged with FBConnect.
+ * 
+ * See FBRequest.m for more detailed comment.
+ */

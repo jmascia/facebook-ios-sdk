@@ -15,7 +15,20 @@
  */
 
 #import "FBRequest.h"
-#import "JSON.h"
+/**
+ * Modified FBConnect code to point to Three20's SBJson header instead of the JSON.h header
+ * packaged with FBConnect. I did this because Three20 and FBConnect both depend on SBJson
+ * but the versions they ship with are slightly different. Bringing both SBJson libraries into
+ * our project causes linker errors because several classes share the same name and generate
+ * duplicate symbols.
+ *
+ * This is the only class in FBConnect that references JSON directly. It uses it's SBJSON class to 
+ * parse the json string - this class seems to be functionally equivalent to the SBJsonParser class
+ * in Three20. So I've choses to use that instead, and not copy over the SBJson library packaged
+ * with FBConnect.
+ */
+#import <extThree20JSON/SBJson.h>
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // global
@@ -180,7 +193,7 @@ static const NSTimeInterval kTimeoutInterval = 180.0;
   NSString* responseString = [[[NSString alloc] initWithData:data
                                                     encoding:NSUTF8StringEncoding]
                               autorelease];
-  SBJSON *jsonParser = [[SBJSON new] autorelease];
+  SBJsonParser* jsonParser = [[[SBJsonParser alloc] init] autorelease];
   if ([responseString isEqualToString:@"true"]) {
     return [NSDictionary dictionaryWithObject:@"true" forKey:@"result"];
   } else if ([responseString isEqualToString:@"false"]) {
@@ -192,7 +205,6 @@ static const NSTimeInterval kTimeoutInterval = 180.0;
     }
     return nil;
   }
-
 
   id result = [jsonParser objectWithString:responseString];
 
