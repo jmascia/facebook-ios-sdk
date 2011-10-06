@@ -587,8 +587,14 @@ static NSString* kSDKVersion = @"2";
   [params setObject:kRedirectURL forKey:@"redirect_uri"];
 
   if (action == kLogin) {
-    [params setObject:@"user_agent" forKey:@"type"];
-    _fbDialog = [[FBLoginDialog alloc] initWithURL:dialogURL loginParams:params delegate:self];
+      [params setObject:@"user_agent" forKey:@"type"];
+      /**
+       * JM: Fixed bug with launching login dialog. client_id (i.e. facebook app id) required for OAuth 2.0 compliance. 
+       * Should be automatically specified by SDK but it's not (https://developers.facebook.com/docs/reference/dialogs/oauth/)
+       */
+      [params setObject:_appId forKey:@"client_id"];
+
+      _fbDialog = [[FBLoginDialog alloc] initWithURL:dialogURL loginParams:params delegate:self];
   } else {
     [params setObject:_appId forKey:@"app_id"];
     if ([self isSessionValid]) {

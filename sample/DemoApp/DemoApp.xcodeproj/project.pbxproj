@@ -92,10 +92,10 @@
 				AE3FC2F511F19A6B001C05F3 /* FBConnect.bundle */,
 				AEE8F65411CC8EF1008BF99E /* FBLoginButton.h */,
 				AEE8F65511CC8EF1008BF99E /* FBLoginButton.m */,
-				AEE8F65011CC8EB3008BF99E /* DemoAppViewController.m */,
 				AEE8F64F11CC8EB3008BF99E /* DemoAppViewController.h */,
-				1D3623250D0F684500981E51 /* DemoAppAppDelegate.m */,
+				AEE8F65011CC8EB3008BF99E /* DemoAppViewController.m */,
 				1D3623240D0F684500981E51 /* DemoAppAppDelegate.h */,
+				1D3623250D0F684500981E51 /* DemoAppAppDelegate.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";

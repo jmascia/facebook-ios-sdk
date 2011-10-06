@@ -134,8 +134,10 @@
 
 /**
  * Called when the dialog succeeds with a returning url.
+ * JM: Changed so it returns both FBDialog and URL. We need reference to the FBDialog object so we
+ * can call getStringFromUrl:needle: to parse the response (because it's an instance method).
  */
-- (void)dialogCompleteWithUrl:(NSURL *)url;
+- (void)dialog:(FBDialog*)dialog didCompleteWithUrl:(NSURL *)url;
 
 /**
  * Called when the dialog get canceled by the user.

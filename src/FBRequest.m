@@ -26,6 +26,8 @@
  * parse the json string - this class seems to be functionally equivalent to the SBJsonParser class
  * in Three20. So I've choses to use that instead, and not copy over the SBJson library packaged
  * with FBConnect.
+ *
+ * Note: This solution breaks the demo app... oh well.
  */
 #import <extThree20JSON/SBJson.h>
 

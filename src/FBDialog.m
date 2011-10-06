@@ -393,40 +393,46 @@ BOOL FBIsDeviceIPad() {
 // UIWebViewDelegate
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
-    navigationType:(UIWebViewNavigationType)navigationType {
-  NSURL* url = request.URL;
-
-  if ([url.scheme isEqualToString:@"fbconnect"]) {
-    if ([[url.resourceSpecifier substringToIndex:8] isEqualToString:@"//cancel"]) {
-      NSString * errorCode = [self getStringFromUrl:[url absoluteString] needle:@"error_code="];
-      NSString * errorStr = [self getStringFromUrl:[url absoluteString] needle:@"error_msg="];
-      if (errorCode) {
-        NSDictionary * errorData = [NSDictionary dictionaryWithObject:errorStr forKey:@"error_msg"];
-        NSError * error = [NSError errorWithDomain:@"facebookErrDomain"
-                                              code:[errorCode intValue]
-                                          userInfo:errorData];
-        [self dismissWithError:error animated:YES];
-      } else {
-        [self dialogDidCancel:url];
-      }
-    } else {
-      [self dialogDidSucceed:url];
-    }
-    return NO;
-  } else if ([_loadingURL isEqual:url]) {
-    return YES;
-  } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
-    if ([_delegate respondsToSelector:@selector(dialog:shouldOpenURLInExternalBrowser:)]) {
-      if (![_delegate dialog:self shouldOpenURLInExternalBrowser:url]) {
+ navigationType:(UIWebViewNavigationType)navigationType {
+    NSURL* url = request.URL;
+    
+    if ([url.scheme isEqualToString:@"fbconnect"]) {
+        /**
+         * JM: Changed this so we can properly catch case where user has deauthorized token in facebook 
+         * privacy settings (otherwise we never know that we need to reauthorized). From pull request by 
+         * mattandlersux (https://github.com/facebook/facebook-ios-sdk/pull/236)
+         */ 
+        NSString * errorCode = [self getStringFromUrl:[url absoluteString] needle:@"error_code="];
+        NSString * errorStr = [self getStringFromUrl:[url absoluteString] needle:@"error_msg="];
+        if ([[url.resourceSpecifier substringToIndex:8] isEqualToString:@"//cancel"] ||
+            ([[url.resourceSpecifier substringToIndex:9] isEqualToString:@"//success"] && errorCode && errorStr)) {  
+            if (errorCode) {
+                NSDictionary * errorData = [NSDictionary dictionaryWithObject:errorStr forKey:@"error_msg"];
+                NSError * error = [NSError errorWithDomain:@"facebookErrDomain"
+                                                      code:[errorCode intValue]
+                                                  userInfo:errorData];
+                [self dismissWithError:error animated:YES];
+            } else {
+                [self dialogDidCancel:url];
+            }
+        } else {
+            [self dialogDidSucceed:url];
+        }
         return NO;
-      }
+    } else if ([_loadingURL isEqual:url]) {
+        return YES;
+    } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
+        if ([_delegate respondsToSelector:@selector(dialog:shouldOpenURLInExternalBrowser:)]) {
+            if (![_delegate dialog:self shouldOpenURLInExternalBrowser:url]) {
+                return NO;
+            }
+        }
+        
+        [[UIApplication sharedApplication] openURL:request.URL];
+        return NO;
+    } else {
+        return YES;
     }
-
-    [[UIApplication sharedApplication] openURL:request.URL];
-    return NO;
-  } else {
-    return YES;
-  }
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
@@ -640,8 +646,8 @@ BOOL FBIsDeviceIPad() {
 
 - (void)dialogDidSucceed:(NSURL *)url {
 
-  if ([_delegate respondsToSelector:@selector(dialogCompleteWithUrl:)]) {
-    [_delegate dialogCompleteWithUrl:url];
+  if ([_delegate respondsToSelector:@selector(dialog:didCompleteWithUrl:)]) {
+    [_delegate dialog:self didCompleteWithUrl:url];
   }
   [self dismissWithSuccess:YES animated:YES];
 }
