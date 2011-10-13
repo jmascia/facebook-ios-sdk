@@ -307,7 +307,7 @@ static NSString* kSDKVersion = @"2";
   // version 3.3 and above encode the parameters in the fragment. To support
   // both versions of the Facebook app, we try to parse the query if
   // the fragment is missing.
-  if (!query) {
+  if (!query.length) {
     query = [url query];
   }
 
