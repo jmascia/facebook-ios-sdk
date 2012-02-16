@@ -371,7 +371,7 @@ params   = _params;
         /**
          * JM: Changed this so we can properly catch case where user has deauthorized token in facebook 
          * privacy settings (otherwise we never know that we need to reauthorized). From pull request by 
-         * mattandlersux (https://github.com/facebook/facebook-ios-sdk/pull/236)
+         * mattandlersux https://github.com/facebook/facebook-ios-sdk/pull/236
          */ 
         NSString * errorCode = [self getStringFromUrl:[url absoluteString] needle:@"error_code="];
         NSString * errorStr = [self getStringFromUrl:[url absoluteString] needle:@"error_msg="];
@@ -390,6 +390,31 @@ params   = _params;
             [self dialogDidSucceed:url];
         }
         return NO;
+      
+    } else if ([[url host] isEqualToString:@"m.facebook.com"] &&
+               [[url lastPathComponent] isEqualToString:@"login.php"]) 
+    {
+      /**
+       * JM: Added hack to handle case where dialog is trying to use an expired/deathorized access 
+       * token. Previously an error was returned so app could decide how to proceed
+       * (e.g. invalidateSession and re-authorize). At some point behavior changed - as of 2/15/12 dialog
+       * redirects to http://m.facebook.com/login.php which presents Facebook login screen. If user enters
+       * credentials, it returns NSURLErrorDomain -999 error, and enters Facebook web app as user, but
+       * does not redirect to Feed post dialog. On subsequent post-to-feed attempts, user gets redirected
+       * to error page and then to Facebook web app if 'okay' is pressed. Doesn't get corrected until we 
+       * invalidate our session (which we don't know to do). This catches the redirect to login.php and 
+       * sends error to delegate so we can re-authorize with SSO.
+       */
+      NSInteger errorCode = 190;
+      NSString* errorStr = @"Access token is not authorized.";
+      NSDictionary * errorData = [NSDictionary dictionaryWithObject:errorStr forKey:@"error_msg"];
+      NSError * error = [NSError errorWithDomain:@"facebookErrDomain"
+                                            code:errorCode
+                                        userInfo:errorData];
+      [self dismissWithError:error animated:YES];
+      
+      return NO;
+      
     } else if ([_loadingURL isEqual:url]) {
         return YES;
     } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
