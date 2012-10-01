@@ -211,14 +211,14 @@ static void *finishedContext = @"finishedContext";
  */
 - (void)authorizeWithFBAppAuth:(BOOL)tryFBAppAuth
                     safariAuth:(BOOL)trySafariAuth {
-  NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                 _appId, @"client_id",
-                                 @"user_agent", @"type",
-                                 kRedirectURL, @"redirect_uri",
-                                 @"touch", @"display",
-                                 kSDK, @"sdk",
-                                 nil];
-
+  
+  NSMutableDictionary* params = [NSMutableDictionary dictionary];
+  [params setValue:_appId forKey:@"client_id"];
+  [params setValue:@"user_agent" forKey:@"type"];
+  [params setValue:kRedirectURL forKey:@"redirect_uri"];
+  [params setValue:@"touch" forKey:@"display"];
+  [params setValue:kSDK forKey:@"sdk"];
+  
   NSString *loginDialogURL = [kDialogBaseURL stringByAppendingString:kLogin];
 
   if (_permissions != nil) {
@@ -483,7 +483,8 @@ static void *finishedContext = @"finishedContext";
   // preserve deprecated callback behavior, but leave cached delegate intact
   // avoid calling twice if the passed and cached delegates are the same
   if (delegate != self.sessionDelegate &&
-    [delegate respondsToSelector:@selector(fbDidLogout)]) {
+      [delegate respondsToSelector:@selector(fbDidLogout)]) 
+  {
     [delegate fbDidLogout];
   }
 }
